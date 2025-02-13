@@ -1,4 +1,5 @@
 import LinkBudgetAnalyzer as lb
+import numpy as np
 
 freq = 2.4E9
 bw   = 1E6
@@ -14,3 +15,12 @@ print( f"Necessary TX power: {analyzer.requiredPtx( 20E3, -90 )}" )
 print( analyzer.noisePower( 290 ) )
 
 print( analyzer.maxBitRate( 30 ) )
+
+graph = lb.GraphicalLink( 2, 1, radio )
+distances = np.linspace( 1, 100 , 100)
+
+graph.plotPathLoss( distances, 1 )
+graph.radio.frequency = 915E6
+graph.plotPathLoss( distances, 1 )
+
+graph.showPlots()

@@ -1,4 +1,5 @@
 import math
+import matplotlib.pyplot as plt
 
 class Radio:
     def __init__( self, frequency, bandwidth, txGain, rxGain ):
@@ -6,6 +7,8 @@ class Radio:
         self.bandwidth = bandwidth
         self.txGain    = txGain
         self.rxGain    = rxGain
+
+
 
 class LinkBudgetAnalyzer:
 
@@ -63,4 +66,37 @@ class LinkBudgetAnalyzer:
     _k = 1.38E-23   # Boltzmans const
     _c = 2.99E8     # Speed of light
     _mW = 1E-3      # 1 milliwatt
+
+
+
+class GraphicalLink( LinkBudgetAnalyzer ):
+    def __init__( self, nrows, ncols, radio: Radio, n=2 ):
+        super().__init__( radio, n )
+        self.fig, self.axes = plt.subplots( nrows=nrows, ncols=ncols )
+
+    def plotRequiredPtx( self ):
+        return 0
+
+    def plotReceivedP( self ):
+        return 0
+
+    def plotPathLoss( self, distances, axesNum ):
+        pathLosses = []
+        for d in distances:
+            pathLosses.append( self.pathLoss( d ) )
+        self.axes[ axesNum ].plot( distances, pathLosses )
+
+    def plotNoisePower( self ):
+        return 0
+
+    def plotSNR( self ):
+        return 0
+
+    def plotMaxBitRate( self ):
+        return 0
+
+    def showPlots( self ):
+        plt.tight_layout()
+        plt.show()
+
 
