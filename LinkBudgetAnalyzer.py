@@ -1,36 +1,66 @@
 import math
 
-class LinkBudgetAnalyzer:
-
-    def __init__( self, radio ):
-        self.radio = radio
-
-    def waveLen( self ):
-        return self._c / self.radio.frequency
-
-    def pathLoss( self, d, n ):
-        return 10 * math.log10( ( 16 * ( math.pi**2 ) * ( d**n ) ) / ( self.waveLen()**2 ) )
-
-    def cnr( self ):
-        return 0
-
-    def sensitivity( self ):
-        return 0
-
-    def nf( self ):
-        return 0
-
-    def requiredPtx( self, Ps, d, n ):
-        return -self.radio.txGain - self.radio.rxGain + self.pathLoss( d, n ) + Ps
-
-    _k = 1.38E-23   # Boltzmans const
-    _c = 2.99E8     # Speed of light
-
-
 class Radio:
-    def __init__( self, frequency, bandwidth, txGain, rxGain, tempK ):
+    def __init__( self, frequency, bandwidth, txGain, rxGain ):
         self.frequency = frequency
         self.bandwidth = bandwidth
         self.txGain    = txGain
         self.rxGain    = rxGain
-        self.tempK     = tempK
+
+class LinkBudgetAnalyzer:
+
+    # radio : radio object containing its unique attributes
+    # n     : path loss exponent (2 for open space)
+    def __init__( self, radio: Radio , n=2 ):
+        self.radio = radio
+        self.n     = n
+
+    # Required TX power [dBm]
+    #
+    # d      : distance between receiver and transmitter
+    # pRxMin : minimum allowable received signal power (receiver sensitivity)
+    def requiredPtx( self, d, pRxMin ):
+        return pRxMin - self.radio.txGain - self.radio.rxGain + self.pathLoss( d )
+    
+    # Received signal power [dBm]
+    #
+    # d   : distance between receiver and transmitter [m]
+    # pTx : transmission power [dBm]
+    def receivedP( self, d, pTx ):
+        return pTx + self.radio.txGain + self.radio.rxGain - self.pathLoss( d )
+
+    # Path loss [dB]
+    #
+    # d   : distance between receiver and transmitter [m]
+    def pathLoss( self, d ):
+        return 10 * self.n * math.log10( ( 4 * math.pi * d ) / self.waveLen() )
+
+    # Wave length [m]
+    def waveLen( self ):
+        return self._c / self.radio.frequency
+
+    # Noise power [dBm]
+    #
+    # tempK : ambient temperature [K]
+    def noisePower( self, tempK ):
+        pNoise = self._k * tempK * self.radio.bandwidth
+        return 10 * math.log10( pNoise / self._mW )
+
+    # Signal to noise ratio [dB]
+    #
+    # tempK     : ambient temperature [K]
+    # receivedP : received signal power [dBm]
+    def snr( self, tempK, receivedP ):
+        return receivedP - self.noisePower( tempK )
+
+    # Max bit rate (Shannon-Hartley Theorem)
+    #
+    # snr : signal to noise ratio [dB]
+    def maxBitRate( self, snr ):
+        linearSnr = 10**( snr / 10 )
+        return int( self.radio.bandwidth * math.log( 1 + linearSnr, 2 ) )
+
+    _k = 1.38E-23   # Boltzmans const
+    _c = 2.99E8     # Speed of light
+    _mW = 1E-3      # 1 milliwatt
+

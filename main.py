@@ -1,10 +1,16 @@
-import LinkBudgetAnalyzer as lba
+import LinkBudgetAnalyzer as lb
 
-radio = lba.Radio( 3960E6, 0, 0, 0, 0 )
+freq = 2.4E9
+bw   = 1E6
+txG  = 10
+rxG  = 10
+radio = lb.Radio( freq, bw, txG, rxG )
+analyzer = lb.LinkBudgetAnalyzer( radio )
 
-analyzer = lba.LinkBudgetAnalyzer( radio )
+print( analyzer.pathLoss( 20E3 ) )
+print( f"Received signal power: {analyzer.receivedP( 20E3, 30 )}" )
+print( f"Necessary TX power: {analyzer.requiredPtx( 20E3, -90 )}" )
 
-for d in range( 10 ):
-    Pl = analyzer.pathLoss( d + 1, 2.7 )
-    print( Pl )
+print( analyzer.noisePower( 290 ) )
 
+print( analyzer.maxBitRate( 30 ) )
