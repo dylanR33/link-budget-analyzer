@@ -1,4 +1,4 @@
-import math
+import math 
 import matplotlib.pyplot as plt
 
 class Radio:
@@ -79,25 +79,35 @@ class GraphicalLink( LinkBudgetAnalyzer ):
         requiredPtxs = []
         for d in distances:
             requiredPtxs.append( self.requiredPtx( d, pRxMin ) )
-        self.axes[ axesNum ].plot( distances, requiredPtxs )
+        self.axes[ axesNum ].plot( distances, requiredPtxs, label="Required TX Power" )
+        self.labelPlot( "Required TX Power vs. Distance", "Distance (m)", "Required TX Power (dBm)", axesNum )
 
     def plotReceivedP( self, distances, pTx, axesNum ):
         receivedPs = []
         for d in distances:
             receivedPs.append( self.receivedP( d, pTx ) )
-        self.axes[ axesNum ].plot( distances, receivedPs )
+        self.axes[ axesNum ].plot( distances, receivedPs, label="Received Power" )
+        self.labelPlot( "Received Power vs. Distance", "Distance (m)", "Received Power", axesNum )
 
     def plotPathLoss( self, distances, axesNum ):
         pathLosses = []
         for d in distances:
             pathLosses.append( self.pathLoss( d ) )
-        self.axes[ axesNum ].plot( distances, pathLosses )
+        self.axes[ axesNum ].plot( distances, pathLosses, label="Path Loss" )
+        self.labelPlot( "Path Loss vs. Distance", "Distance (m)", "Path Loss (dBm)", axesNum )
 
     def plotNoisePower( self, bandwidths, axesNum ):
         noisePowers = []
         for b in bandwidths:
             noisePowers.append( self.noisePower( b ) )
-        self.axes[ axesNum ].plot( bandwidths, noisePowers )
+        self.axes[ axesNum ].plot( bandwidths, noisePowers, label="Noise Power" )
+        self.labelPlot( "Noise Power vs. Bandwidths", "Bandwidths (Hz)", "Noise Power (dBm)", axesNum )
+
+    def labelPlot( self, title, x_label, y_label, axesNum ):
+        self.axes[ axesNum ].set_title( title )
+        self.axes[ axesNum ].set_xlabel( x_label )
+        self.axes[ axesNum ].set_ylabel( y_label )
+        self.axes[ axesNum ].legend()
 
     def showPlots( self ):
         plt.tight_layout()
