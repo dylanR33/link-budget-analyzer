@@ -2,11 +2,12 @@ import math
 import matplotlib.pyplot as plt
 
 class Radio:
-    def __init__( self, frequency, bandwidth, txGain, rxGain ):
+    def __init__( self, frequency, bandwidth, txGain, rxGain, tempK ):
         self.frequency = frequency
         self.bandwidth = bandwidth
         self.txGain    = txGain
         self.rxGain    = rxGain
+        self.tempK     = tempK
 
 
 
@@ -43,25 +44,25 @@ class LinkBudgetAnalyzer:
         return self._c / self.radio.frequency
 
     # Noise power [dBm]
-    #
-    # tempK : ambient temperature [K]
-    def noisePower( self, tempK ):
-        pNoise = self._k * tempK * self.radio.bandwidth
+    # bandwidth : radio bandwidth
+    def noisePower( self, bandwidth ):
+        pNoise = self._k * self.radio.tempK * bandwidth 
         return 10 * math.log10( pNoise / self._mW )
 
     # Signal to noise ratio [dB]
     #
-    # tempK     : ambient temperature [K]
     # receivedP : received signal power [dBm]
-    def snr( self, tempK, receivedP ):
-        return receivedP - self.noisePower( tempK )
+    # bandwidth : radio bandwidth
+    def snr( self, receivedP, bandwidth ):
+        return receivedP - self.noisePower( bandwidth )
 
     # Max bit rate (Shannon-Hartley Theorem)
     #
-    # snr : signal to noise ratio [dB]
-    def maxBitRate( self, snr ):
+    # snr       : signal to noise ratio [dB]
+    # bandwidth : radio bandwidth
+    def maxBitRate( self, snr, bandwidth ):
         linearSnr = 10**( snr / 10 )
-        return int( self.radio.bandwidth * math.log( 1 + linearSnr, 2 ) )
+        return int( bandwidth * math.log( 1 + linearSnr, 2 ) )
 
     _k = 1.38E-23   # Boltzmans const
     _c = 2.99E8     # Speed of light
@@ -74,11 +75,17 @@ class GraphicalLink( LinkBudgetAnalyzer ):
         super().__init__( radio, n )
         self.fig, self.axes = plt.subplots( nrows=nrows, ncols=ncols )
 
-    def plotRequiredPtx( self ):
-        return 0
+    def plotRequiredPtx( self, distances, pRxMin, axesNum ):
+        requiredPtxs = []
+        for d in distances:
+            requiredPtxs.append( self.requiredPtx( d, pRxMin ) )
+        self.axes[ axesNum ].plot( distances, requiredPtxs )
 
-    def plotReceivedP( self ):
-        return 0
+    def plotReceivedP( self, distances, pTx, axesNum ):
+        receivedPs = []
+        for d in distances:
+            receivedPs.append( self.receivedP( d, pTx ) )
+        self.axes[ axesNum ].plot( distances, receivedPs )
 
     def plotPathLoss( self, distances, axesNum ):
         pathLosses = []
@@ -86,17 +93,13 @@ class GraphicalLink( LinkBudgetAnalyzer ):
             pathLosses.append( self.pathLoss( d ) )
         self.axes[ axesNum ].plot( distances, pathLosses )
 
-    def plotNoisePower( self ):
-        return 0
-
-    def plotSNR( self ):
-        return 0
-
-    def plotMaxBitRate( self ):
-        return 0
+    def plotNoisePower( self, bandwidths, axesNum ):
+        noisePowers = []
+        for b in bandwidths:
+            noisePowers.append( self.noisePower( b ) )
+        self.axes[ axesNum ].plot( bandwidths, noisePowers )
 
     def showPlots( self ):
         plt.tight_layout()
         plt.show()
-
 
