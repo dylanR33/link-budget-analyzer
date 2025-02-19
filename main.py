@@ -1,23 +1,21 @@
 import LinkBudgetAnalyzer as lb
 import numpy as np
 
-freq = 2.4E9
-bw   = 1E6
-txG  = 10
-rxG  = 10
+freq = 915E6
+txG  = 1
+rxG  = 1
 tempK = 290
-radio = lb.Radio( freq, bw, txG, rxG, tempK )
+lora = lb.Radio( freq, txG, rxG, tempK )
+bw = 125E3
 
-analyzer = lb.LinkBudgetAnalyzer( radio )
+distances = np.linspace( 1, 9144 , 100)
+bandwidths = np.linspace( 7.8E3, 500E3, 100 )
 
-graph = lb.GraphicalLink( 2, 1, radio )
+analyzer = lb.LinkBudgetAnalyzer( lora )
+nrows = 2
+ncols = 1
+graph = lb.GraphicalLink( nrows, ncols, lora )
 
-distances = np.linspace( 1, 100 , 100)
-graph.plotRequiredPtx( distances, 10, 0 )
-graph.plotReceivedP( distances, 10, 0 )
-graph.plotPathLoss( distances, 0 )
-
-bandwidths = np.linspace( 1E6, 3E6, 100 )
-graph.plotNoisePower( bandwidths, 1 )
+graph.plotRequiredPtx( distances, -95, 0)
 
 graph.showPlots()

@@ -2,9 +2,8 @@ import math
 import matplotlib.pyplot as plt
 
 class Radio:
-    def __init__( self, frequency, bandwidth, txGain, rxGain, tempK ):
+    def __init__( self, frequency, txGain, rxGain, tempK ):
         self.frequency = frequency
-        self.bandwidth = bandwidth
         self.txGain    = txGain
         self.rxGain    = rxGain
         self.tempK     = tempK
@@ -79,21 +78,21 @@ class GraphicalLink( LinkBudgetAnalyzer ):
         requiredPtxs = []
         for d in distances:
             requiredPtxs.append( self.requiredPtx( d, pRxMin ) )
-        self.axes[ axesNum ].plot( distances, requiredPtxs, label="Required TX Power" )
+        self.axes[ axesNum ].plot( distances, requiredPtxs, label=f"RX Power Min: { pRxMin } dBm" )
         self.labelPlot( "Required TX Power vs. Distance", "Distance (m)", "Required TX Power (dBm)", axesNum )
 
     def plotReceivedP( self, distances, pTx, axesNum ):
         receivedPs = []
         for d in distances:
             receivedPs.append( self.receivedP( d, pTx ) )
-        self.axes[ axesNum ].plot( distances, receivedPs, label="Received Power" )
+        self.axes[ axesNum ].plot( distances, receivedPs, label=f"TX Power: { pTx } dBm" )
         self.labelPlot( "Received Power vs. Distance", "Distance (m)", "Received Power", axesNum )
 
     def plotPathLoss( self, distances, axesNum ):
         pathLosses = []
         for d in distances:
             pathLosses.append( self.pathLoss( d ) )
-        self.axes[ axesNum ].plot( distances, pathLosses, label="Path Loss" )
+        self.axes[ axesNum ].plot( distances, pathLosses, label=f"Frequency: { self.radio.frequency } Hz" )
         self.labelPlot( "Path Loss vs. Distance", "Distance (m)", "Path Loss (dBm)", axesNum )
 
     def plotNoisePower( self, bandwidths, axesNum ):
